@@ -160,7 +160,7 @@ public partial class MainWindow : Window
         };
 
         // _keysGlitch = new GlitchTextBlock("You may now find the keys");
-        _keysGlitch = new GlitchTextBlock("You may now find the keys");
+        _keysGlitch = new GlitchTextBlock("you may now proceed to the next room");
         _keysGlitch.FontSize = 36;
         _keysGlitch.Foreground = Brushes.LightGreen;
         _keysGlitch.FontFamily = new FontFamily("Consolas");
