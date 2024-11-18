@@ -18,7 +18,7 @@ namespace BinaryAdditionAnimal;
 /// </summary>
 public partial class MainWindow : Window
 {
-    private const string CORRECT_PASSWORD = "DCE077ABD";
+    private const string CORRECT_PASSWORD = "CEC5";
     private GlitchTextBlock _accessGrantedGlitch;
     private GlitchTextBlock _keysGlitch;
     private List<AudioSequence> _audioSequences;
