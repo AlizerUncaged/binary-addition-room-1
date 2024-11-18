@@ -21,12 +21,62 @@ public partial class MainWindow : Window
     private const string CORRECT_PASSWORD = "DCE077ABD";
     private GlitchTextBlock _accessGrantedGlitch;
     private GlitchTextBlock _keysGlitch;
+    private List<AudioSequence> _audioSequences;
+    private MediaPlayer _mediaPlayer;
+    private bool _isPlaying;
 
+
+    private void InitializeAudioSequences()
+    {
+        _mediaPlayer = new MediaPlayer();
+        _audioSequences = new List<AudioSequence>();
+    
+        for (int i = 0; i < CORRECT_PASSWORD.Length; i++)
+        {
+            char hexChar = CORRECT_PASSWORD[i];
+            string binary = Convert.ToString(Convert.ToInt32(hexChar.ToString(), 16), 2).PadLeft(4, '0');
+            _audioSequences.Add(new AudioSequence 
+            { 
+                Label = $"Character {i + 1} ({hexChar}): ",
+                BinarySequence = binary
+            });
+        }
+    
+        AudioButtons.ItemsSource = _audioSequences;
+    }
+
+    private async void PlayAudio_Click(object sender, RoutedEventArgs e)
+    {
+        if (_isPlaying) return;
+    
+        var button = (Button)sender;
+        var binarySequence = (string)button.Tag;
+        _isPlaying = true;
+        button.IsEnabled = false;
+
+        try
+        {
+            foreach (char bit in binarySequence)
+            {
+                string soundFile = bit == '1' ? "bark.mp3" : "meow.mp3";
+                _mediaPlayer.Open(new Uri(soundFile, UriKind.Relative));
+                _mediaPlayer.Play();
+            
+                await Task.Delay(500); // Wait 0.5 seconds between bits
+            }
+        }
+        finally
+        {
+            _isPlaying = false;
+            button.IsEnabled = true;
+        }
+    }
     public MainWindow()
     {
-        InitializeComponent();
-        InitializeGlitchTexts();
-        PasswordInput.Focus();
+    InitializeComponent();
+    InitializeGlitchTexts();
+    InitializeAudioSequences();
+    PasswordInput.Focus();
     }
 
     private void InitializeGlitchTexts()
@@ -131,4 +181,12 @@ public partial class MainWindow : Window
             CheckPassword();
         }
     }
+    
+    
+    public class AudioSequence
+    {
+        public string Label { get; set; }
+        public string BinarySequence { get; set; }
+    }
+
 }

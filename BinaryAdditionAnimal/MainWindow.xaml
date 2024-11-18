@@ -91,11 +91,36 @@
             </TextBlock>
 
             <!-- Binary Code Display -->
-            <StackPanel Grid.Row="1" 
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center">
-             
-            </StackPanel>
+    <StackPanel Grid.Row="1" 
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                Margin="40,0,0,0">
+        <TextBlock Text="DECRYPT AUDIO SEQUENCE:"
+                  Foreground="#00FF00"
+                  FontFamily="Consolas"
+                  FontSize="24"
+                  Margin="0,0,0,20"/>
+        <ItemsControl x:Name="AudioButtons">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal" Margin="0,5">
+                        <TextBlock Text="{Binding Label}"
+                                 Foreground="#00FF00"
+                                 FontFamily="Consolas"
+                                 FontSize="18"
+                                 VerticalAlignment="Center"
+                                 Margin="0,0,10,0"/>
+                        <Button Content="PLAY"
+                                Style="{StaticResource MatrixButton}"
+                                Width="100"
+                                Height="35"
+                                Click="PlayAudio_Click"
+                                Tag="{Binding BinarySequence}"/>
+                    </StackPanel>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </StackPanel>
 
             <!-- Password Input Section -->
             <StackPanel Grid.Row="2" 
