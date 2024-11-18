@@ -98,7 +98,7 @@ public partial class MainWindow : Window
                                 soundPlayer.Open(new Uri(fullPath, UriKind.Absolute));
                                 soundPlayer.Play();
                                 // Fixed delay of 1.5 seconds before next sound
-                                 Task.Delay(1500).GetAwaiter().GetResult();
+                                 Task.Delay(1200).GetAwaiter().GetResult();
                             }
                             catch (Exception ex)
                             {
