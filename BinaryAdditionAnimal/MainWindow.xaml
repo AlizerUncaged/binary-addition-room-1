@@ -59,92 +59,104 @@
             </Style.Triggers>
         </Style>
     </Window.Resources>
-  <Grid>
+ <Grid>
         <!-- Matrix Rain Background -->
         <local:MatrixRainControl HorizontalAlignment="Stretch" VerticalAlignment="Stretch" x:Name="MatrixBackground"/>
         
         <!-- Main Content -->
         <Grid x:Name="MainContent">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/> <!-- Audio Controls -->
+                <ColumnDefinition Width="*"/> <!-- Login Content -->
+            </Grid.ColumnDefinitions>
 
             <!-- Semi-transparent overlay -->
-            <Rectangle Grid.RowSpan="4" Fill="#66000000"/>
+            <Rectangle Grid.ColumnSpan="2" Fill="#66000000"/>
 
-            <!-- Title -->
-            <TextBlock Grid.Row="0" 
-                       Text="AURORA BINARY CODE STATION"
-                       Foreground="#00FF00"
-                       FontFamily="Consolas"
-                       FontSize="42"
-                       HorizontalAlignment="Center"
-                       Margin="20">
-                <TextBlock.Effect>
-                    <DropShadowEffect Color="#00FF00" 
-                                     BlurRadius="20"
-                                     ShadowDepth="0"/>
-                </TextBlock.Effect>
-            </TextBlock>
+            <!-- Audio Controls Panel -->
+            <ScrollViewer Grid.Column="0" 
+                         VerticalScrollBarVisibility="Auto" 
+                         HorizontalScrollBarVisibility="Disabled"
+                         Margin="20,0,0,0">
+                <StackPanel Margin="0,100,20,0">
+                    <TextBlock Text="DECRYPT AUDIO SEQUENCE:"
+                              Foreground="#00FF00"
+                              FontFamily="Consolas"
+                              
+                              FontSize="24"
+                              Margin="0,0,0,20"
+                              TextWrapping="Wrap"/>
+                    <ItemsControl x:Name="AudioButtons">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Margin="0,5">
+                                    <TextBlock Text="{Binding Label}"
+                                             Foreground="#00FF00"
+                                             FontFamily="Consolas"
+                                             FontSize="18"     TextWrapping="Wrap"
+                                             VerticalAlignment="Center"
+                                             Margin="0,0,10,0"/>
+                                    <Button Content="PLAY"
+                                            Style="{StaticResource MatrixButton}"
+                                            Width="100"
+                                            Height="35"
+                                            Click="PlayAudio_Click"
+                                            Tag="{Binding BinarySequence}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </ScrollViewer>
 
-            <!-- Binary Code Display -->
-    <StackPanel Grid.Row="1" 
-                HorizontalAlignment="Left"
-                VerticalAlignment="Center"
-                Margin="40,0,0,0">
-        <TextBlock Text="DECRYPT AUDIO SEQUENCE:"
-                  Foreground="#00FF00"
-                  FontFamily="Consolas"
-                  FontSize="24"
-                  Margin="0,0,0,20"/>
-        <ItemsControl x:Name="AudioButtons">
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <StackPanel Orientation="Horizontal" Margin="0,5">
-                        <TextBlock Text="{Binding Label}"
-                                 Foreground="#00FF00"
-                                 FontFamily="Consolas"
-                                 FontSize="18"
-                                 VerticalAlignment="Center"
-                                 Margin="0,0,10,0"/>
-                        <Button Content="PLAY"
-                                Style="{StaticResource MatrixButton}"
-                                Width="100"
-                                Height="35"
-                                Click="PlayAudio_Click"
-                                Tag="{Binding BinarySequence}"/>
-                    </StackPanel>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
-    </StackPanel>
+            <!-- Login Content -->
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
 
-            <!-- Password Input Section -->
-            <StackPanel Grid.Row="2" 
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
-                        Margin="20">
-                <TextBlock Text="ENTER ACCESS CODE:"
-                          Foreground="#00FF00"
-                          FontFamily="Consolas"
-                          FontSize="24"
-                          Margin="0,0,0,20"/>
-                <TextBox x:Name="PasswordInput"
-                         Style="{StaticResource MatrixTextBox}"
-                         Width="400"
-                         Height="60"
-                         KeyDown="PasswordInput_KeyDown"/>
-                <Button x:Name="LoginButton"
-                        Content="LOGIN"
-                        Style="{StaticResource MatrixButton}"
-                        Width="200"
-                        Height="50"
-                        Margin="0,20,0,0"
-                        Click="LoginButton_Click"/>
-            </StackPanel>
+                <!-- Title -->
+                <TextBlock Grid.Row="0" 
+                           Text="AURORA BINARY CODE STATION"
+                           Foreground="#00FF00"
+                           FontFamily="Consolas"
+                           FontSize="42"    TextWrapping="Wrap"
+                           HorizontalAlignment="Center"
+                           Margin="20">
+                    <TextBlock.Effect>
+                        <DropShadowEffect Color="#00FF00" 
+                                         BlurRadius="20"
+                                         ShadowDepth="0"/>
+                    </TextBlock.Effect>
+                </TextBlock>
+
+                <!-- Password Input Section -->
+                <StackPanel Grid.Row="2" 
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Margin="20">
+                    <TextBlock Text="ENTER ACCESS CODE:"
+                              Foreground="#00FF00"
+                              FontFamily="Consolas"
+                              FontSize="24"
+                              Margin="0,0,0,20"/>
+                    <TextBox x:Name="PasswordInput"
+                             Style="{StaticResource MatrixTextBox}"
+                             Width="400"
+                             Height="60"
+                             KeyDown="PasswordInput_KeyDown"/>
+                    <Button x:Name="LoginButton"
+                            Content="LOGIN"
+                            Style="{StaticResource MatrixButton}"
+                            Width="200"
+                            Height="50"
+                            Margin="0,20,0,0"
+                            Click="LoginButton_Click"/>
+                </StackPanel>
+            </Grid>
         </Grid>
 
         <!-- Access Granted Overlay -->

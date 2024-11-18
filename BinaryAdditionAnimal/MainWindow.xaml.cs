@@ -25,30 +25,45 @@ public partial class MainWindow : Window
     private MediaPlayer _mediaPlayer;
     private bool _isPlaying;
 
-
     private void InitializeAudioSequences()
     {
-        _mediaPlayer = new MediaPlayer();
         _audioSequences = new List<AudioSequence>();
-    
+
+        // Verify audio files exist
+        string[] requiredFiles = { "bark.mp3", "meow.mp3" };
+        foreach (string file in requiredFiles)
+        {
+            string fullPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, file);
+            if (!System.IO.File.Exists(fullPath))
+            {
+                MessageBox.Show($"Required audio file not found: {file}\nExpected path: {fullPath}\n\n" +
+                                "Please ensure the audio files are in the application directory.",
+                    "Missing Files",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+            }
+        }
+
         for (int i = 0; i < CORRECT_PASSWORD.Length; i++)
         {
             char hexChar = CORRECT_PASSWORD[i];
             string binary = Convert.ToString(Convert.ToInt32(hexChar.ToString(), 16), 2).PadLeft(4, '0');
-            _audioSequences.Add(new AudioSequence 
-            { 
-                Label = $"Character {i + 1} ({hexChar}): ",
+            _audioSequences.Add(new AudioSequence
+            {
+                // Label = $"Character {i + 1} ({hexChar}) [{binary}]: ",
+                Label = $"Character {i + 1}: ",
                 BinarySequence = binary
             });
         }
-    
+
         AudioButtons.ItemsSource = _audioSequences;
     }
+
 
     private async void PlayAudio_Click(object sender, RoutedEventArgs e)
     {
         if (_isPlaying) return;
-    
+
         var button = (Button)sender;
         var binarySequence = (string)button.Tag;
         _isPlaying = true;
@@ -56,27 +71,75 @@ public partial class MainWindow : Window
 
         try
         {
-            foreach (char bit in binarySequence)
+            await Task.Run(async () =>
             {
-                string soundFile = bit == '1' ? "bark.mp3" : "meow.mp3";
-                _mediaPlayer.Open(new Uri(soundFile, UriKind.Relative));
-                _mediaPlayer.Play();
-            
-                await Task.Delay(500); // Wait 0.5 seconds between bits
-            }
+                foreach (char bit in binarySequence)
+                {
+                    try
+                    {
+                        // Dispatcher needed for UI operations
+                        await Application.Current.Dispatcher.InvokeAsync(() =>
+                        {
+                            var soundPlayer = new MediaPlayer();
+                            string soundFile = bit == '1' ? "bark.mp3" : "meow.mp3";
+                            string fullPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, soundFile);
+
+                            if (!System.IO.File.Exists(fullPath))
+                            {
+                                MessageBox.Show($"Sound file not found: {soundFile}\nExpected path: {fullPath}",
+                                    "File Not Found Error",
+                                    MessageBoxButton.OK,
+                                    MessageBoxImage.Error);
+                                return;
+                            }
+
+                            try
+                            {
+                                soundPlayer.Open(new Uri(fullPath, UriKind.Absolute));
+                                soundPlayer.Play();
+                                // Fixed delay of 1.5 seconds before next sound
+                                 Task.Delay(1500).GetAwaiter().GetResult();
+                            }
+                            catch (Exception ex)
+                            {
+                                MessageBox.Show($"Error playing audio: {ex.Message}",
+                                    "Playback Error",
+                                    MessageBoxButton.OK,
+                                    MessageBoxImage.Error);
+                            }
+                        });
+
+                    }
+                    catch (Exception ex)
+                    {
+                        await Application.Current.Dispatcher.InvokeAsync(() =>
+                        {
+                            MessageBox.Show($"Error in audio sequence: {ex.Message}",
+                                "Sequence Error",
+                                MessageBoxButton.OK,
+                                MessageBoxImage.Error);
+                        });
+                        break;
+                    }
+                }
+            });
         }
         finally
         {
-            _isPlaying = false;
-            button.IsEnabled = true;
+            await Application.Current.Dispatcher.InvokeAsync(() =>
+            {
+                _isPlaying = false;
+                button.IsEnabled = true;
+            });
         }
     }
+
     public MainWindow()
     {
-    InitializeComponent();
-    InitializeGlitchTexts();
-    InitializeAudioSequences();
-    PasswordInput.Focus();
+        InitializeComponent();
+        InitializeGlitchTexts();
+        InitializeAudioSequences();
+        PasswordInput.Focus();
     }
 
     private void InitializeGlitchTexts()
@@ -181,12 +244,11 @@ public partial class MainWindow : Window
             CheckPassword();
         }
     }
-    
-    
+
+
     public class AudioSequence
     {
         public string Label { get; set; }
         public string BinarySequence { get; set; }
     }
-
 }
