@@ -78,37 +78,41 @@ public partial class MainWindow : Window
                     try
                     {
                         // Dispatcher needed for UI operations
-                        await Application.Current.Dispatcher.InvokeAsync(() =>
-                        {
-                            var soundPlayer = new MediaPlayer();
-                            string soundFile = bit == '1' ? "bark.mp3" : "meow.mp3";
-                            string fullPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, soundFile);
 
-                            if (!System.IO.File.Exists(fullPath))
+                        var soundPlayer = new MediaPlayer();
+                        string soundFile = bit == '1' ? "bark.mp3" : "meow.mp3";
+                        string fullPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, soundFile);
+
+                        if (!System.IO.File.Exists(fullPath))
+                        {
+                            await Application.Current.Dispatcher.InvokeAsync(() =>
                             {
                                 MessageBox.Show($"Sound file not found: {soundFile}\nExpected path: {fullPath}",
                                     "File Not Found Error",
                                     MessageBoxButton.OK,
                                     MessageBoxImage.Error);
-                                return;
-                            }
+                            });
 
-                            try
-                            {
-                                soundPlayer.Open(new Uri(fullPath, UriKind.Absolute));
-                                soundPlayer.Play();
-                                // Fixed delay of 1.5 seconds before next sound
-                                 Task.Delay(1200).GetAwaiter().GetResult();
-                            }
-                            catch (Exception ex)
+                            return;
+                        }
+
+                        try
+                        {
+                            soundPlayer.Open(new Uri(fullPath, UriKind.Absolute));
+                            soundPlayer.Play();
+                            // Fixed delay of 1.5 seconds before next sound
+                            await Task.Delay(1200);
+                        }
+                        catch (Exception ex)
+                        {
+                            await Application.Current.Dispatcher.InvokeAsync(() =>
                             {
                                 MessageBox.Show($"Error playing audio: {ex.Message}",
                                     "Playback Error",
                                     MessageBoxButton.OK,
                                     MessageBoxImage.Error);
-                            }
-                        });
-
+                            });
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -155,6 +159,7 @@ public partial class MainWindow : Window
             ShadowDepth = 0
         };
 
+        // _keysGlitch = new GlitchTextBlock("You may now find the keys");
         _keysGlitch = new GlitchTextBlock("You may now find the keys");
         _keysGlitch.FontSize = 36;
         _keysGlitch.Foreground = Brushes.LightGreen;
