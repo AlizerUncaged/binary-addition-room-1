@@ -24,6 +24,7 @@ public partial class MainWindow : Window
     private List<AudioSequence> _audioSequences;
     private MediaPlayer _mediaPlayer;
     private bool _isPlaying;
+    private bool jumpscareTriggered = false;
 
     private void InitializeAudioSequences()
     {
@@ -187,15 +188,51 @@ public partial class MainWindow : Window
         }
     }
 
+    private void PlayJumpscare()
+    {
+        var window = new Window
+        {
+            WindowStyle = WindowStyle.None,
+            WindowState = WindowState.Maximized,
+            Topmost = true,
+            ShowInTaskbar = false,
+            Background = Brushes.Black
+        };
+
+        var player = new MediaElement
+        {
+            Source = new Uri("fun.mp4", UriKind.Relative),
+            LoadedBehavior = MediaState.Manual,
+            UnloadedBehavior = MediaState.Stop,
+            Stretch = Stretch.Uniform,
+            Volume = 1, IsMuted = false
+        };
+
+        player.MediaEnded += (s, e) =>
+        {
+            window.Close();
+            player.Close();
+        };
+
+        window.Content = player;
+        window.Show();
+        player.Play();
+    }
+
     private async void ShowAccessGranted()
     {
+        if (!jumpscareTriggered)
+        {
+            jumpscareTriggered = true;
+            PlayJumpscare();
+        }
+
         AccessGrantedOverlay.Visibility = Visibility.Visible;
         MainContent.Visibility = Visibility.Collapsed;
 
         _accessGrantedGlitch.StartGlitch();
         _keysGlitch.StartGlitch();
 
-        // Create glitch animation
         var glitchAnimation = new DoubleAnimation
         {
             From = 1.0,
@@ -206,18 +243,26 @@ public partial class MainWindow : Window
         };
         AccessGrantedOverlay.BeginAnimation(OpacityProperty, glitchAnimation);
 
-        await Task.Delay(5000); // Show for 5 seconds
+        await Task.Delay(5000);
 
         _accessGrantedGlitch.StopGlitch();
         _keysGlitch.StopGlitch();
+
+        // Reset jumpscare trigger for next player
+        jumpscareTriggered = false;
     }
 
     private async void ShowAccessDenied()
     {
+        if (!jumpscareTriggered)
+        {
+            jumpscareTriggered = true;
+            PlayJumpscare();
+        }
+
         AccessDeniedOverlay.Visibility = Visibility.Visible;
         MainContent.Visibility = Visibility.Collapsed;
 
-        // Create glitch animation
         var glitchAnimation = new DoubleAnimation
         {
             From = 1.0,
@@ -229,7 +274,7 @@ public partial class MainWindow : Window
 
         AccessDeniedOverlay.BeginAnimation(OpacityProperty, glitchAnimation);
 
-        await Task.Delay(2000); // Show for 2 seconds
+        await Task.Delay(2000);
 
         AccessDeniedOverlay.Visibility = Visibility.Collapsed;
         MainContent.Visibility = Visibility.Visible;
