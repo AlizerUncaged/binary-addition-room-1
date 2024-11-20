@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.ComponentModel;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -18,7 +19,7 @@ namespace BinaryAdditionAnimal;
 /// </summary>
 public partial class MainWindow : Window
 {
-    private const string CORRECT_PASSWORD = "CE70";
+    private const string CORRECT_PASSWORD = "D47F";
     private GlitchTextBlock _accessGrantedGlitch;
     private GlitchTextBlock _keysGlitch;
     private List<AudioSequence> _audioSequences;
@@ -60,6 +61,25 @@ public partial class MainWindow : Window
         AudioButtons.ItemsSource = _audioSequences;
     }
 
+    private void PlayStartAudio()
+    {
+        new Thread(() =>
+        {
+            try
+            {
+                var audioPlayer = new MediaPlayer();
+                string audioPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "start.mp3");
+                audioPlayer.Open(new Uri(audioPath));
+                audioPlayer.Play();
+
+                Thread.Sleep(4000);
+            }
+            catch (Exception ex)
+            {
+                ;
+            }
+        }).Start();
+    }
 
     private async void PlayAudio_Click(object sender, RoutedEventArgs e)
     {
@@ -139,14 +159,67 @@ public partial class MainWindow : Window
         }
     }
 
+    // Add these fields for jumpscare
+    private Window _jumpscareWindow;
+    private MediaElement _jumpscarePlayer;
+
     public MainWindow()
     {
         InitializeComponent();
         InitializeGlitchTexts();
         InitializeAudioSequences();
+        InitializeJumpscare(); // Add this line
         PasswordInput.Focus();
     }
 
+    private void InitializeJumpscare()
+    {
+        _jumpscareWindow = new Window
+        {
+            WindowStyle = WindowStyle.None,
+            WindowState = WindowState.Maximized,
+            Topmost = true,
+            ShowInTaskbar = false,
+            Background = Brushes.Black,
+            Visibility = Visibility.Hidden // Hide window by default
+        };
+
+        _jumpscarePlayer = new MediaElement
+        {
+            Source = new Uri("fun.mp4", UriKind.Relative),
+            LoadedBehavior = MediaState.Manual,
+            UnloadedBehavior = MediaState.Stop,
+            Stretch = Stretch.Uniform,
+            Volume = 0, // Start muted
+            IsMuted = false
+        };
+
+        _jumpscarePlayer.MediaEnded += (s, e) =>
+        {
+            _jumpscareWindow.Hide();
+            _jumpscarePlayer.Position = TimeSpan.Zero; // Reset position
+            _jumpscarePlayer.Play(); // Keep playing in background
+            _jumpscarePlayer.Volume = 0;
+
+            if (fnafSound)
+            {
+                PlayStartAudio();
+                fnafSound = false;
+            }
+        };
+
+        _jumpscareWindow.Content = _jumpscarePlayer;
+        _jumpscareWindow.Loaded += (s, e) =>
+        {
+            _jumpscarePlayer.Play(); // Start playing (muted) when window is loaded
+        };
+
+        // Create but don't show the window - this preloads the video
+        _jumpscareWindow.Show();
+        _jumpscareWindow.Hide();
+    }
+
+    private bool fnafSound = false;
     private void InitializeGlitchTexts()
     {
         _accessGrantedGlitch = new GlitchTextBlock("ACCESS GRANTED");
@@ -188,35 +261,21 @@ public partial class MainWindow : Window
         }
     }
 
+
     private void PlayJumpscare()
     {
-        var window = new Window
-        {
-            WindowStyle = WindowStyle.None,
-            WindowState = WindowState.Maximized,
-            Topmost = true,
-            ShowInTaskbar = false,
-            Background = Brushes.Black
-        };
+        // Reset position to start (with small offset to prevent black frame)
+        _jumpscarePlayer.Position = TimeSpan.FromMilliseconds(1);
+        _jumpscarePlayer.Volume = 1; // Set full volume
+        _jumpscareWindow.Show(); // Show the window
+        fnafSound = true;
+    }
 
-        var player = new MediaElement
-        {
-            Source = new Uri("fun.mp4", UriKind.Relative),
-            LoadedBehavior = MediaState.Manual,
-            UnloadedBehavior = MediaState.Stop,
-            Stretch = Stretch.Uniform,
-            Volume = 1, IsMuted = false
-        };
-
-        player.MediaEnded += (s, e) =>
-        {
-            window.Close();
-            player.Close();
-        };
-
-        window.Content = player;
-        window.Show();
-        player.Play();
+    protected override void OnClosing(CancelEventArgs e)
+    {
+        _jumpscarePlayer?.Close();
+        _jumpscareWindow?.Close();
+        base.OnClosing(e);
     }
 
     private async void ShowAccessGranted()
@@ -226,6 +285,8 @@ public partial class MainWindow : Window
             jumpscareTriggered = true;
             PlayJumpscare();
         }
+
+        //  PlayStartAudio();
 
         AccessGrantedOverlay.Visibility = Visibility.Visible;
         MainContent.Visibility = Visibility.Collapsed;

@@ -18,6 +18,9 @@
       <None Update="fun.mp4">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
+      <None Update="start.mp3">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
 </Project>
