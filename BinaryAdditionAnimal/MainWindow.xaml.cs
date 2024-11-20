@@ -227,6 +227,9 @@ public partial class MainWindow : Window
             PlayJumpscare();
         }
 
+        // Reset jumpscare trigger for next player
+        jumpscareTriggered = false;
+        
         AccessGrantedOverlay.Visibility = Visibility.Visible;
         MainContent.Visibility = Visibility.Collapsed;
 
@@ -248,8 +251,6 @@ public partial class MainWindow : Window
         _accessGrantedGlitch.StopGlitch();
         _keysGlitch.StopGlitch();
 
-        // Reset jumpscare trigger for next player
-        jumpscareTriggered = false;
     }
 
     private async void ShowAccessDenied()
